@@ -1,6 +1,8 @@
 # Repos List App
 
-A simple app that will display a list of repositories of `facebook` org.
+A simple app that will display a list of repositories of `facebook` org.<br/>
+**Important:** To make it work, it is necessary to set your own **GitHub** token in the `src/utils/api.ts`.
+
 
 ## Available Scripts
 

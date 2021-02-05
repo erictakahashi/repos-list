@@ -1,9 +1,17 @@
-import axios from '../../../utils/api';
+import * as UtilsAxios from '../../../utils/api';
 import { reposActions } from '../repos';
 import { getRepos } from '../repos';
 
+jest.mock('../../../utils/api', () => {
+  const original = jest.requireActual('../../../utils/api')
+  return {
+    __esModule: true,
+    default: jest.fn(original.default)
+  }
+});
+
 describe('repos action', () => {
-  let get: any;
+  let axios: any;
 
   let dispatch: any, getState: any;
 
@@ -13,7 +21,7 @@ describe('repos action', () => {
   const reposState = { repos };
 
   beforeEach(() => {
-    get = jest.spyOn(axios, 'get');
+    axios = jest.spyOn(UtilsAxios, 'default');
 
     dispatch = jest.fn();
     getState = jest.fn();
@@ -36,48 +44,57 @@ describe('repos action', () => {
 
   describe('getRepos', () => {
     describe('pre existing `repos` data in the state', () => {
-      it('should not call axios `get` nor `dispatch`', () => {
+      it('should not call `axios` nor `dispatch`', () => {
         getRepos()(dispatch, getState);
 
-        expect(get).not.toHaveBeenCalled();
+        expect(axios).not.toHaveBeenCalled();
         expect(dispatch).not.toHaveBeenCalled();
       });
     });
 
     describe('no pre existing `repos` data  in the state', () => {
-      it('should call axios `get` with the proper path, and call dispatch with `SET_REPOS` action and the proper payload, once the `get` promise is done', () => {
+      it('should call `axios` and call dispatch with `SET_REPOS` action and the proper payload, once the `axios` promise is done', () => {
         const promiseTimeout = new Promise((resolve: Function) => (
-          setTimeout(() => resolve({ data: repos }), 100)
+          setTimeout(() => resolve({ 
+            data: {
+              data: {
+                organization: {
+                  repositories: {
+                    nodes: repos
+                  }
+                }
+              }
+            }
+          }), 100)
         ));
 
         getState.mockReturnValue({ repos: { repos: [] } });
-        get.mockReturnValue(promiseTimeout);
+        axios.mockReturnValue(promiseTimeout);
 
         getRepos()(dispatch, getState);
 
-        const expectedPath = '/repos';
-        expect(get).toHaveBeenCalledWith(expectedPath);
+        expect(axios).toHaveBeenCalled();
 
-        return get().then(({ data = [] }) => {
+        return axios().then(() => {
           expect(dispatch).toHaveBeenCalledWith({
             type: reposActions.SET_REPOS,
-            payload: data
+            payload: repos
           });
         });
       });
 
-      it('should call dispatch with `SET_REPOS` action and and empty array as a payload when `get` promise got rejected', () => {
+      it('should call dispatch with `SET_REPOS` action and and empty array as a payload when `axios` promise got rejected', () => {
         const error = 'Error';
         const promiseReject = new Promise((_, reject: Function) => (
           setTimeout(() => reject(error), 100)
         ));
 
         getState.mockReturnValue({ repos: { repos: [] } });
-        get.mockReturnValue(promiseReject);
+        axios.mockReturnValue(promiseReject);
 
         getRepos()(dispatch, getState);
 
-        return get().catch(() => {
+        return axios().catch(() => {
           expect(dispatch).toHaveBeenCalledWith({
             type: reposActions.SET_REPOS,
             payload: []

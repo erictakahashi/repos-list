@@ -19,11 +19,11 @@ describe('Home', () => {
 
   const repos = [
     {
-      forks_count: 1,
-      html_url: 'url',
+      forks: { totalCount: 1 },
+      id: 'id',
       name: 'name',
-      stargazers_count: 2,
-      ssh_url: 'ssh'
+      stargazers: { totalCount: 1 },
+      url: 'url'
     }
   ];
 

@@ -40,12 +40,16 @@ interface IRenderTable {
   data?: Array<object>
 }
 
+interface ITotalCount {
+  totalCount?: number
+}
+
 interface IRepoItem {
-  forks_count?: number,
-  html_url?: string,
+  forks?: ITotalCount,
+  id?: string,
   name?: string,
-  stargazers_count?: number,
-  ssh_url?: string
+  stargazers?: ITotalCount,
+  url?: string
 }
 
 export const RenderTable: FC<IRenderTable> = (props: IRenderTable) => {
@@ -68,12 +72,12 @@ export const RenderTable: FC<IRenderTable> = (props: IRenderTable) => {
 
         <Styled.TableBody>
           {data.map((item: IRepoItem) => (
-            <Styled.TableRow key={item.ssh_url}>
+            <Styled.TableRow key={item.id}>
               <Styled.TableCell component="th" scope="row">
-                <Styled.TableLink href={item.html_url}>{item.name}</Styled.TableLink>
+                <Styled.TableLink href={item.url}>{item.name}</Styled.TableLink>
               </Styled.TableCell>
-              <Styled.TableCell align="right">{item.stargazers_count}</Styled.TableCell>
-              <Styled.TableCell align="right">{item.forks_count}</Styled.TableCell>
+              <Styled.TableCell align="right">{item.stargazers?.totalCount}</Styled.TableCell>
+              <Styled.TableCell align="right">{item.forks?.totalCount}</Styled.TableCell>
             </Styled.TableRow>
           ))}
         </Styled.TableBody>

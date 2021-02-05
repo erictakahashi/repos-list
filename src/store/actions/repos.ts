@@ -9,13 +9,33 @@ export const getRepos = () => async (dispatch: Function, getState: Function) => 
 
   if (!repos || !repos.length) {
     try {
-      const response = await axios.get('/repos');
-      const { data = [] } = response || {};
+      const response = await axios({
+        method: 'post',
+        data: {
+          query: `
+            query GetFacebookRepositories {
+              organization(login: "facebook") {
+                repositories(first: 50) {
+                  nodes {
+                    id
+                    forks {
+                      totalCount
+                    }
+                    name
+                    stargazers {
+                      totalCount
+                    }
+                    url
+                  }
+                }
+              }
+            }
+          `
+        }
+      });
 
-      if (!!data.length) {
-        dispatch({ type: reposActions.SET_REPOS, payload: data });
-      }
-
+      const fbRepos = response?.data?.data?.organization?.repositories?.nodes || [];
+      dispatch({ type: reposActions.SET_REPOS, payload: fbRepos });
     } catch (error) {
       dispatch({ type: reposActions.SET_REPOS, payload: [] });
     }
